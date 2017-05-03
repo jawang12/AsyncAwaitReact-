@@ -1,9 +1,11 @@
-# Ignore all node_modules
-node_modules/*
-
-# Compiled JS
+.idea
+node_modules
+npm-debug.log
+.DS_Store
+coverage
+**.mp3
+**.m4a
+**.mp4
+server/audio/
 public/bundle.js
 public/bundle.js.map
-
-# NPM errors
-npm-debug.log

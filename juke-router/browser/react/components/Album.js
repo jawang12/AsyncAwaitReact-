@@ -1,12 +1,15 @@
 import React from 'react';
 import Songs from '../components/Songs';
+import PropTypes from 'prop-types';
 
-const Album = (props) => {
+class Album extends React.Component {
 
-  const album = props.album;
-  const currentSong = props.currentSong;
-  const isPlaying = props.isPlaying;
-  const toggleOne = props.toggleOne;
+  componentDidMount() {
+    this.props.selectAlbum(+this.props.params.albumId);
+  }
+
+  render() {
+  const { currentSong, isPlaying, toggleOne, album } = this.props;
 
   return (
     <div className="album">
@@ -20,7 +23,16 @@ const Album = (props) => {
         isPlaying={isPlaying}
         toggleOne={toggleOne} />
     </div>
-  );
+    );
+  }
 }
+
+Album.propTypes = {
+  album: PropTypes.object,
+  toggleOne: PropTypes.func,
+  currentSong: PropTypes.object,
+  isPlaying: PropTypes.bool,
+  selectAlbum: PropTypes.func
+};
 
 export default Album;
