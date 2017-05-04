@@ -90,7 +90,7 @@ class App extends React.Component {
         <Sidebar toggle={ this.toggleBack }/>
         {
           !this.state.selectedAlbum.id ?  <Albums albums={ this.state.albums } handleClick={ this.handleClick }/>
-          : <SingleAlbum { ...this.state } play={ this.play } />
+          : <SingleAlbum { ...this.state } play={ this.play } toggle={ this.toggle }/>
         }
         {
           this.state.currentSong.id ? <Footer { ...this.state } toggle={ this.toggle } nextSong={ this.nextSong } previous={ this.previous }/> : null
