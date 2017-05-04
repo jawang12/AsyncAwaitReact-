@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { hashHistory } from 'react-router';
 
 import initialState from '../initialState';
 import AUDIO from '../audio';
@@ -22,6 +23,7 @@ export default class AppContainer extends Component {
     this.selectAlbum = this.selectAlbum.bind(this);
     this.selectArtist = this.selectArtist.bind(this);
     this.createPlaylist = this.createPlaylist.bind(this);
+    this.selectPlaylist = this.selectPlaylist.bind(this);
   }
 
   async componentDidMount () {
@@ -123,9 +125,22 @@ export default class AppContainer extends Component {
   async createPlaylist(event) {
     try {
       const playlist = await axios.post('/api/playlists', { name: event.target.name.value });
-      this.setState({ playlists: [...this.state.playlists, playlist.data]})
+      this.setState({ playlists: [...this.state.playlists, playlist.data]});
+      hashHistory.push(`/playlist/${playlist.data.id}`);
     } catch(err) {
       console.error('unable to create new playlist', err);
+    }
+  }
+
+  async selectPlaylist(playlistId) {
+    try {
+      const playlist = await axios.get(`/api/playlists/${ playlistId }`);
+      console.log('this is the playlist', playlist.data);
+      const selectedPlaylist = playlist.data;
+      selectedPlaylist.songs = selectedPlaylist.songs.map(song => convertSong(song));
+      this.setState({ selectedPlaylist });
+    } catch (err) {
+      console.error('unable to load playlist', err);
     }
   }
 
@@ -161,7 +176,9 @@ export default class AppContainer extends Component {
 
           songs: this.state.currentSongList,
 
-          createPlaylist: this.createPlaylist
+          createPlaylist: this.createPlaylist,
+          selectPlaylist: this.selectPlaylist,
+          playlist: this.state.selectedPlaylist
           })
           : null
         }
