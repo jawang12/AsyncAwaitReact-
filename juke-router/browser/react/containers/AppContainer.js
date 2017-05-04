@@ -21,6 +21,7 @@ export default class AppContainer extends Component {
     this.prev = this.prev.bind(this);
     this.selectAlbum = this.selectAlbum.bind(this);
     this.selectArtist = this.selectArtist.bind(this);
+    this.createPlaylist = this.createPlaylist.bind(this);
   }
 
   async componentDidMount () {
@@ -35,8 +36,9 @@ export default class AppContainer extends Component {
 
     const albums = await axios.get('/api/albums');
     const artists = await axios.get('/api/artists');
+    const playlists = await axios.get('/api/playlists');
 
-    this.onLoad(convertAlbums(albums.data), artists.data);
+    this.onLoad(convertAlbums(albums.data), artists.data, playlists.data);
 
     AUDIO.addEventListener('ended', () =>
       this.next());
@@ -44,10 +46,11 @@ export default class AppContainer extends Component {
       this.setProgress(AUDIO.currentTime / AUDIO.duration));
   }
 
-  onLoad (albums, artists) {
+  onLoad (albums, artists, playlists) {
     this.setState({
       albums,
-      artists
+      artists,
+      playlists
     });
   }
 
@@ -117,11 +120,20 @@ export default class AppContainer extends Component {
     })
   }
 
+  async createPlaylist(event) {
+    try {
+      const playlist = await axios.post('/api/playlists', { name: event.target.name.value });
+      this.setState({ playlists: [...this.state.playlists, playlist.data]})
+    } catch(err) {
+      console.error('unable to create new playlist', err);
+    }
+  }
+
   render () {
     return (
       <div id="main" className="container-fluid">
         <div className="col-xs-2">
-          <Sidebar />
+          <Sidebar playlists={ this.state.playlists }/>
         </div>
         <div className="col-xs-10">
         {
@@ -147,7 +159,9 @@ export default class AppContainer extends Component {
           selectedArtist: this.state.selectedArtist,
           artistAlbums: this.state.artistAlbums,
 
-          songs: this.state.currentSongList
+          songs: this.state.currentSongList,
+
+          createPlaylist: this.createPlaylist
           })
           : null
         }

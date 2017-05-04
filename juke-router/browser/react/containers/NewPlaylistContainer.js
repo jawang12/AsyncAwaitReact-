@@ -1,6 +1,6 @@
 import React from 'react';
 import NewPlaylist from '../components/NewPlaylist';
-import axios from 'axios';
+import PropTypes from 'prop-types';
 
 export default class NewPlaylistContainer extends React.Component {
   constructor(props) {
@@ -18,25 +18,26 @@ export default class NewPlaylistContainer extends React.Component {
     this.setState({ input: event.target.value, initial: true });
   }
 
-  async handleSubmit(event) {
+  handleSubmit(event) {
     event.preventDefault();
-    try {
-      const playlist = await axios.post('/api/playlists', { name: event.target.name.value })
-      this.setState({ input: '' });
-    } catch(err) {
-      console.error('unable to create new playlist', err);
-    }
+    this.props.createPlaylist(event);
+    this.setState({ input: '', initial: false });
   }
   validate() {
     return this.state.input.length > 0 && this.state.input.length < 17;
   }
 
   render() {
+    const warningMsg = !this.state.input.length ? 'Please enter a name' : 'Name cannot be longer than 16 characters';
     return (
       <div>
         <NewPlaylist handleChange={ this.handleChange } handleSubmit={ this.handleSubmit } { ...this.state } validate={ this.validate }/>
-        { this.state.initial && !this.validate() && <div className="alert alert-warning">Please enter a name</div> }
+        { this.state.initial && !this.validate() && <div className="alert alert-warning">{ warningMsg }</div> }
       </div>
     );
   }
 }
+
+NewPlaylistContainer.propTypes = {
+  createPlaylist: PropTypes.func
+};

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
+import PropTypes from 'prop-types';
 
-const Sidebar = () => {
+const Sidebar = ({ playlists }) => {
 
   return (
     <sidebar>
@@ -25,8 +26,20 @@ const Sidebar = () => {
           </Link>
         </h4>
       </section>
+      <hr />
+      <ul className="list-unstyled">
+      { playlists.map(playlist => (
+        <li className="playlist-item menu-item" key={ playlist.id }>
+          <Link to="FILL_ME_IN">{ playlist.name }</Link>
+        </li>
+      ))}
+      </ul>
     </sidebar>
   );
 };
 
 export default Sidebar;
+
+Sidebar.propTypes = {
+  playlists: PropTypes.array
+};
