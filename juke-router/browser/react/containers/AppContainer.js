@@ -7,7 +7,7 @@ import AUDIO from '../audio';
 import Sidebar from '../components/Sidebar';
 import Player from '../components/Player';
 
-import { convertAlbum, convertAlbums, skip } from '../utils';
+import { convertAlbum, convertAlbums, skip, convertSong } from '../utils';
 
 export default class AppContainer extends Component {
 
@@ -20,17 +20,23 @@ export default class AppContainer extends Component {
     this.next = this.next.bind(this);
     this.prev = this.prev.bind(this);
     this.selectAlbum = this.selectAlbum.bind(this);
+    this.selectArtist = this.selectArtist.bind(this);
   }
 
-  componentDidMount () {
+  async componentDidMount () {
+    /*
     const getAlbums = axios.get('/api/albums');
     const getArtists = axios.get('/api/artists');
     Promise.all([getAlbums, getArtists])
     .then(([albums, artists]) => {
       this.onLoad(convertAlbums(albums.data), artists.data);
     })
-    .catch(err => console.error('unable to load', err));
+    .catch(err => console.error('unable to load', err)); */
 
+    const albums = await axios.get('/api/albums');
+    const artists = await axios.get('/api/artists');
+
+    this.onLoad(convertAlbums(albums.data), artists.data);
 
     AUDIO.addEventListener('ended', () =>
       this.next());
@@ -93,17 +99,22 @@ export default class AppContainer extends Component {
     this.setState({ progress: progress });
   }
 
-  selectAlbum (albumId) {
-    axios.get(`/api/albums/${albumId}`)
-      .then(res => res.data)
-      .then(album => this.setState({
-        selectedAlbum: convertAlbum(album)
-      }));
+  async selectAlbum (albumId) {
+    const album = await axios.get(`/api/albums/${albumId}`)
+    this.setState({ selectedAlbum: convertAlbum(album.data) });
   }
 
   async selectArtist (artistId) {
     const artist = await axios.get(`/api/artists/${artistId}`);
-    this.setState({ selectedArtist: artist.data })
+    //load all albums of artist
+    const albums = await axios.get(`/api/artists/${artistId}/albums`);
+    const songs = await axios.get(`/api/artists/${artistId}/songs`);
+
+    this.setState({
+      selectedArtist: artist.data,
+      artistAlbums: convertAlbums(albums.data),
+      currentSongList: songs.data.map(song => convertSong(song))
+    })
   }
 
   render () {
@@ -128,7 +139,15 @@ export default class AppContainer extends Component {
           selectAlbum: this.selectAlbum,
 
           //Artists
-          artists: this.state.artists
+          artists: this.state.artists,
+
+          //Artist
+          artist: this.state.selectedArtist,
+          selectArtist: this.selectArtist,
+          selectedArtist: this.state.selectedArtist,
+          artistAlbums: this.state.artistAlbums,
+
+          songs: this.state.currentSongList
           })
           : null
         }
