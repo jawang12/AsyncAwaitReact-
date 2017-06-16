@@ -39,8 +39,11 @@ export default class AppContainer extends Component {
     const albums = await axios.get('/api/albums');
     const artists = await axios.get('/api/artists');
     const playlists = await axios.get('/api/playlists');
+    const songs = await axios.get('/api/songs');
 
-    this.onLoad(convertAlbums(albums.data), artists.data, playlists.data);
+    console.log(albums)
+
+    this.onLoad(convertAlbums(albums.data), artists.data, playlists.data, songs.data);
 
     AUDIO.addEventListener('ended', () =>
       this.next());
@@ -48,11 +51,12 @@ export default class AppContainer extends Component {
       this.setProgress(AUDIO.currentTime / AUDIO.duration));
   }
 
-  onLoad (albums, artists, playlists) {
+  onLoad (albums, artists, playlists, allSongs) {
     this.setState({
       albums,
       artists,
-      playlists
+      playlists,
+      allSongs
     });
   }
 
@@ -178,7 +182,8 @@ export default class AppContainer extends Component {
 
           createPlaylist: this.createPlaylist,
           selectPlaylist: this.selectPlaylist,
-          playlist: this.state.selectedPlaylist
+          playlist: this.state.selectedPlaylist,
+          allSongs: this.state.allSongs
           })
           : null
         }

@@ -9,7 +9,8 @@ const initialState = {
   selectedArtist: {},
   artistAlbums: [],
   playlists: [],
-  selectedPlaylist: {}
+  selectedPlaylist: {},
+  allSongs: []
 };
 
 export default initialState;
