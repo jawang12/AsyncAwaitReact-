@@ -8,7 +8,7 @@ const Songs = (props) => {
   const toggle = props.toggleOne;
 
   return (
-    <table className='table'>
+    <table className="table">
       <thead>
         <tr>
           <th></th>

@@ -7,13 +7,15 @@ class SinglePlaylist extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      playlistSongs: {}
+      songId: 1
     };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
     this.props.selectPlaylist(+this.props.params.playlistId);
-
+    this.props.loadSongs();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -27,24 +29,37 @@ class SinglePlaylist extends Component {
     }
   }
 
+  handleChange(event) {
+    this.setState({ songId: event.target.value });
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    const { updatePlaylist } = this.props;
+    const playlistId = this.props.params.playlistId;
+    const { songId } = this.state;
+
+    updatePlaylist(+playlistId, +songId);
+  }
+
   render() {
     const { playlist, allSongs } = this.props;
-    const songsList = allSongs.map((song, i) => <option key={ i } value={ song.id }>{ song.name } </option>);
+    const songsList = allSongs.map((song, i) => <option key={ i } value={ song.id }>{ song.name }</option>);
 
     return (
       <div>
         <h3>{ playlist.name }</h3>
-        <Songs songs={playlist.songs} />
+        <Songs { ...this.props } songs={playlist.songs} />
         { playlist.songs && !playlist.songs.length && <small>No songs.</small> }
         <hr />
         <div className="well">
-          <form className="form-horizontal" noValidate name="songSelect">
+          <form className="form-horizontal" noValidate name="songSelect" onSubmit={ (e) => this.handleSubmit(e)} >
             <fieldset>
               <legend>Add to Playlist</legend>
               <div className="form-group">
                 <label htmlFor="song" className="col-xs-2 control-label">Song</label>
                 <div className="col-xs-10">
-                  <select className="form-control" name="song">
+                  <select className="form-control" name="song" onChange={ (e) => this.handleChange(e) }>
                   { songsList }
                   </select>
                 </div>
@@ -66,6 +81,8 @@ export default SinglePlaylist;
 
 SinglePlaylist.propTypes = {
   selectPlaylist: PropTypes.func,
-  songsList: PropTypes.array,
+  updatePlaylist: PropTypes.func,
+  allSongs: PropTypes.array,
+  loadSongs: PropTypes.func,
   playlist: PropTypes.object
 };

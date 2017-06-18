@@ -24,6 +24,8 @@ export default class AppContainer extends Component {
     this.selectArtist = this.selectArtist.bind(this);
     this.createPlaylist = this.createPlaylist.bind(this);
     this.selectPlaylist = this.selectPlaylist.bind(this);
+    this.updatePlaylist = this.updatePlaylist.bind(this);
+    this.loadSongs = this.loadSongs.bind(this);
   }
 
   async componentDidMount () {
@@ -39,11 +41,8 @@ export default class AppContainer extends Component {
     const albums = await axios.get('/api/albums');
     const artists = await axios.get('/api/artists');
     const playlists = await axios.get('/api/playlists');
-    const songs = await axios.get('/api/songs');
 
-    console.log(albums)
-
-    this.onLoad(convertAlbums(albums.data), artists.data, playlists.data, songs.data);
+    this.onLoad(convertAlbums(albums.data), artists.data, playlists.data);
 
     AUDIO.addEventListener('ended', () =>
       this.next());
@@ -51,12 +50,11 @@ export default class AppContainer extends Component {
       this.setProgress(AUDIO.currentTime / AUDIO.duration));
   }
 
-  onLoad (albums, artists, playlists, allSongs) {
+  onLoad (albums, artists, playlists) {
     this.setState({
       albums,
       artists,
       playlists,
-      allSongs
     });
   }
 
@@ -109,7 +107,7 @@ export default class AppContainer extends Component {
   }
 
   async selectAlbum (albumId) {
-    const album = await axios.get(`/api/albums/${albumId}`)
+    const album = await axios.get(`/api/albums/${albumId}`);
     this.setState({ selectedAlbum: convertAlbum(album.data) });
   }
 
@@ -123,7 +121,7 @@ export default class AppContainer extends Component {
       selectedArtist: artist.data,
       artistAlbums: convertAlbums(albums.data),
       currentSongList: songs.data.map(song => convertSong(song))
-    })
+    });
   }
 
   async createPlaylist(event) {
@@ -131,7 +129,7 @@ export default class AppContainer extends Component {
       const playlist = await axios.post('/api/playlists', { name: event.target.name.value });
       this.setState({ playlists: [...this.state.playlists, playlist.data]});
       hashHistory.push(`/playlist/${playlist.data.id}`);
-    } catch(err) {
+    } catch (err) {
       console.error('unable to create new playlist', err);
     }
   }
@@ -139,12 +137,36 @@ export default class AppContainer extends Component {
   async selectPlaylist(playlistId) {
     try {
       const playlist = await axios.get(`/api/playlists/${ playlistId }`);
-      console.log('this is the playlist', playlist.data);
       const selectedPlaylist = playlist.data;
       selectedPlaylist.songs = selectedPlaylist.songs.map(song => convertSong(song));
       this.setState({ selectedPlaylist });
     } catch (err) {
       console.error('unable to load playlist', err);
+    }
+  }
+
+  async updatePlaylist(playlistId, songId) {
+    try {
+      const song = await axios.post(`/api/playlists/${playlistId}/songs`, { id: songId });
+      const selectedPlaylist = this.state.selectedPlaylist;
+      const songs = selectedPlaylist.songs;
+      const newSongs = [...songs, convertSong(song.data)];
+      const newPlaylist = Object.assign({}, selectedPlaylist, { songs: newSongs });
+
+      this.setState({ selectedPlaylist: newPlaylist });
+
+    } catch (err) {
+      console.error('unable to add song to playlist', err);
+    }
+  }
+
+
+  async loadSongs() {
+    try {
+      const allSongs = await axios.get(`/api/songs`);
+      this.setState({ allSongs: allSongs.data });
+    } catch (err) {
+      console.error('unable to load songs', err);
     }
   }
 
@@ -183,7 +205,9 @@ export default class AppContainer extends Component {
           createPlaylist: this.createPlaylist,
           selectPlaylist: this.selectPlaylist,
           playlist: this.state.selectedPlaylist,
-          allSongs: this.state.allSongs
+          allSongs: this.state.allSongs,
+          updatePlaylist: this.updatePlaylist,
+          loadSongs: this.loadSongs
           })
           : null
         }
