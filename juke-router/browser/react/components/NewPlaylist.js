@@ -4,13 +4,13 @@ import PropTypes from 'prop-types';
 const NewPlaylist = ({ handleChange, handleSubmit, input, validate }) => {
   return (
     <div className="well">
-      <form className="form-horizontal" onSubmit={ (e) => handleSubmit(e) }>
+      <form className="form-horizontal" onSubmit={ handleSubmit }>
         <fieldset>
           <legend>New Playlist</legend>
           <div className="form-group">
             <label className="col-xs-2 control-label">Name</label>
             <div className="col-xs-10">
-              <input className="form-control" type="text" name="name" value={ input } onChange={ (e) => handleChange(e) }/>
+              <input className="form-control" type="text" name="name" value={ input } onChange={ handleChange }/>
             </div>
           </div>
           <div className="form-group">

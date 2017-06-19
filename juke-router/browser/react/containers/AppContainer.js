@@ -208,6 +208,7 @@ export default class AppContainer extends Component {
           allSongs: this.state.allSongs,
           updatePlaylist: this.updatePlaylist,
           loadSongs: this.loadSongs
+
           })
           : null
         }
